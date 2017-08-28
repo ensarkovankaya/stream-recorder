@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.utils.translation import ugettext as _
-from iptv.models import Category, Channel
+from recorder.models import Category, Channel
 
 import os
 import re
