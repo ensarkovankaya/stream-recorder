@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.utils import timezone
 from django.utils.translation import ugettext as _
 
-from .models import Category, Channel, Record, Process
+from .models import Category, Channel, Record
 
 
 class ChannelInline(admin.TabularInline):
@@ -44,7 +44,7 @@ class RecordAdmin(admin.ModelAdmin):
     list_display = ['id', 'name', 'channel', 'start_time', 'time', 'status']
     list_filter = ['status', 'channel']
     fields = ('channel', 'name', 'status', 'start_time', 'time', 'file', 'log', 'created_at', 'updated_at')
-    readonly_fields = ('created_at', 'updated_at', 'status', 'file', 'user', 'log')
+    readonly_fields = ('created_at', 'updated_at', 'status', 'file', 'user', 'log', 'pid', 'cmd')
 
     form = RecordAdminForm
 
@@ -57,13 +57,3 @@ class RecordAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Record, RecordAdmin)
-
-
-class ProcessAdmin(admin.ModelAdmin):
-    list_display = ['id', 'record', 'status', 'created_at']
-    list_filter = ['status']
-    fields = ('record', 'pid', 'file', 'status', 'cmd', 'log', 'created_at', 'updated_at')
-    readonly_fields = ('created_at', 'updated_at', 'status', 'record', 'pid', 'cmd', 'log', 'file')
-
-
-admin.site.register(Process, ProcessAdmin)

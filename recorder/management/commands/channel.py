@@ -1,11 +1,14 @@
 from django.core.management.base import BaseCommand, CommandError
 from recorder.models import Category, Channel
+from prettytable import PrettyTable
 
 
 class Command(BaseCommand):
     help = """Add Channel or Category"""
 
     def add_arguments(self, parser):
+        parser.add_argument('-list', choices=['channel', 'category'], help="List channels or categories")
+        parser.add_argument('--count', type=int, default=20, help="Number of channel or categories will be display")
         parser.add_argument('-add', choices=['channel', 'category'], help="Add a channel")
         parser.add_argument('--channel-name', type=str, help="Channel Name")
         parser.add_argument('--channel-url', type=str, help="Channel URL")
@@ -17,8 +20,14 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         if options.get('add') == 'category':
             self.add_category(**options)
-        if options.get('add') == 'channel':
+        elif options.get('add') == 'channel':
             self.add_channel(**options)
+        elif options.get('list') == 'channel':
+            self.list_channels(**options)
+        elif options.get('list') == 'category':
+            self.list_categories(**options)
+        else:
+            self.print_help('channel', None)
 
     def add_category(self, **options):
         name = options.get('category_name')
@@ -106,3 +115,21 @@ class Command(BaseCommand):
             return Category.objects.get_or_create(name=name)
         except Exception as err:
             raise CommandError('Category can not created by name %s\n%s' % (name, err))
+
+    def list_channels(self, **options):
+        channels = Channel.objects.all()
+        t = PrettyTable(['id', 'Name', 'Category', 'URL'])
+        for ch in channels[:options.get('count', 20)]:
+            t.add_row([ ch.id, ch.name,
+            ch.category if ch.category else "",
+            ch.url ])
+        print(t)
+
+    def list_categories(self, **options):
+        categories = Category.objects.all()
+        t = PrettyTable(['id', 'Name', 'Channel Count'])
+        for ct in categories[:options.get('count', 20)]:
+            t.add_row([
+                ct.id, ct.name, ct.channel_count()
+            ])
+        print(t)

@@ -8,9 +8,9 @@ import re
 
 class Command(BaseCommand):
     help = """Imports Channels from EXTM3U formated file
-    
+
     # IMPORTANT!
-    Data must formatted as follow: 
+    Data must formatted as follow:
     '#EXTINF:-1 tvg-id="(?P<tvg_id>.*)" tvg-name="(?P<tvg_name>.*)" tvg-logo="(?P<tvg_logo>http.+)?" group-title="(?P<group_title>.*)",(?P<name>.+)\n(?P<url>http.+)'
     """
 

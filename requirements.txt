@@ -1,2 +1,4 @@
 Django==1.11.4
 Pillow==4.2.1
+prettytable==0.7.2
+psutil==5.2.2

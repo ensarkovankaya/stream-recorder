@@ -6,4 +6,5 @@ class RecorderConfig(AppConfig):
     verbose_name = _('IP TV Recorder')
 
     def ready(self):
-        import recorder.signals.handlers  #noqa
+        #import recorder.signals.handlers  #noqa
+        pass

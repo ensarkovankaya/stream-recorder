@@ -2,6 +2,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils.translation import ugettext as _
+from django.utils import timezone
 
 User = getattr(settings, 'AUTH_USER_MODEL', get_user_model())
 
@@ -14,6 +15,9 @@ class Category(models.Model):
 
     def __str__(self):
         return str(self.name)
+
+    def channel_count(self):
+        return Channel.objects.all().filter(category=self.id).count()
 
 
 class Channel(models.Model):
@@ -28,62 +32,43 @@ class Channel(models.Model):
         return str(self.name)
 
 
-class File(models.Model):
-    video = models.FileField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-
 class Record(models.Model):
     channel = models.ForeignKey('Channel', verbose_name=_('Kanal'))
     name = models.CharField(verbose_name=_('Kayıt Adı'), max_length=100)
     start_time = models.DateTimeField(verbose_name=_('Başlangıç'))
     time = models.TimeField(verbose_name=_('Süre'))
+    terminate = models.BooleanField(default=False, verbose_name=_("İptal Et"))
 
-    file = models.ManyToManyField('File')
+    file = models.FileField(verbose_name=_('Dosya'), upload_to='videos/', null=True, blank=True)
 
     status = models.PositiveSmallIntegerField(verbose_name=_('Durum'), choices=[
         (0, _('Zamanlandı')),
         (1, _('Başladı')),
         (2, _('İşleniyor')),
         (3, _('Başarılı')),
-        (4, _('Zaman Aşımı')),
-        (5, _('Hata'))
+        (4, _('İptal Edildi')),
+        (5, _('Zaman Aşımı')),
+        (6, _('Hata'))
     ], default=0)
 
     log = models.TextField(verbose_name=_('Log'), null=True, blank=True)
+    pid = models.PositiveSmallIntegerField(null=True, blank=True)
+    cmd = models.TextField(verbose_name=_('Komut'), null=True, blank=True)
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     deleted = models.BooleanField(default=False)
+
+    record_started = models.DateTimeField(null=True, blank=True)
+    record_ended = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_('Ekleniş'))
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_('Son Güncelleme'))
 
     def __str__(self):
         return str(self.name)
 
-
-class Process(models.Model):
-    record = models.OneToOneField('Record', verbose_name=_('Kayıt'))
-    pid = models.PositiveSmallIntegerField(null=True, blank=True)
-
-    cmd = models.TextField(verbose_name=_('Komut'), null=True, blank=True)
-    log = models.TextField(verbose_name=_('Log'), null=True, blank=True)
-
-    file = models.ForeignKey('File', null=True, blank=True)
-
-    status = models.PositiveSmallIntegerField(verbose_name=_('Durum'), choices=[
-        (0, _('Bekliyor')),
-        (1, _('Çalışıyor')),
-        (2, _('Başarılı')),
-        (3, _('Sonlandırıldı')),
-        (4, _('Hata'))
-    ])
-
-    start_time = models.DateTimeField(verbose_name=_('Başladı'), blank=True, null=True)
-    end_time = models.DateTimeField(verbose_name=_('Bitti'), blank=True, null=True)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return str(self.id)
+    def add_log(self, msg):
+        log = "-" * 10 + " " + \
+        timezone.now().strftime('%d/%m/%Y %H:%M:%S') + \
+        " " + "-" * 10 + "\n" + str(msg)
+        self.log = self.log + "\n" + log if self.log else log
+        self.save()
