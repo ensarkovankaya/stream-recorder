@@ -68,6 +68,7 @@ class Recorder(threading.Thread):
         try:
             self.rcd.status = 4
             self.rcd.save()
+            self.rcd.add_log("Terminated")
         except Exception as err:
             logger.exception("Could not marked as terminated.")
 
