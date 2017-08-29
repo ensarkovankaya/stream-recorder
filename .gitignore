@@ -4,3 +4,5 @@
 *__pycache__*
 *migrations*
 .venv
+script.sh
+media/

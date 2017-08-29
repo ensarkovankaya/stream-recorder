@@ -1,107 +1,107 @@
-from .models import Record
-from django.conf import settings
 import os
+import threading
 import time
-import psutil
+from logging import getLogger
 
-class Deamon:
+from django.conf import settings
+from django.utils import timezone
 
-    def __init__(self):
-        self._lock = os.path.join(settings.BASE_DIR, '.deamon')
+from recorder.record import Recorder
+from .models import Record
 
-    def start(self):
-        if self.is_running():
-            print('Already Running')
-            return
+logger = getLogger('recorder.daemon')
 
-        print('Starting...')
-        try:
-            self._run()
-        except Exception as err:
-            self._remove_lock()
-            raise err
-        return self
 
-    def _create_lock(self):
-        try:
-            with open(self._lock, 'w') as lock:
-                lock.write(str(os.getpid()))
-                print('Lock Created.')
-        except Exception as err:
-            self._remove_lock()
-            raise err
+class Daemon(threading.Thread):
+    def __init__(self, wait=2, threshold=5):
+        """Recorder Daemon: Gets records and when times come run them.
 
-    def _read_pid(self):
-        try:
-            with open(self._lock, 'r') as lock:
-                pid = int(lock.read())
-                print('Read Pid: %s' % pid)
-        except Exception as err:
-            raise err
-        return pid
+        :arg wait : How many seconds should wait before check new records again. This should be lower than threshold
+        :arg threshold : Gets records that given threshold between now and now + threshold second
+        """
+        threading.Thread.__init__(self, daemon=True)
+        self._lock = os.path.join(settings.BASE_DIR, '.daemon.lock')
+        self.wait = wait
+        self.threshold = threshold
+        logger.debug("Lock File: %s" % self._lock)
 
     def _remove_lock(self):
+        """Remove daemon lock file"""
         try:
             os.remove(self._lock)
-            print('Lock removed.')
+            logger.debug("Lock removed")
         except Exception as err:
             raise err
 
-    def _kill_proc(self, pid, signal):
-        print('Sending signal %s to Process %s' % (signal, pid))
+    def _create_lock(self):
+        """Create a lock file"""
         try:
-            os.kill(pid, signal)
+            with open(self._lock, 'w') as lock:
+                pid = str(os.getpid())
+                lock.write(pid)
+                logger.debug("Lock Created pid: %s" % pid)
         except Exception as err:
-            raise err
-
-    def stop(self):
-        if not self.is_running():
-            print('Already stoped.')
-            return
-
-        try:
-            # pid = self._read_pid()
-
-            # Remove lock and wait to close itself
             self._remove_lock()
-            # time.sleep(3)
-
-            # # If still exists send signal
-            # if psutil.pid_exists(pid):
-            #     self._kill_proc(pid, 15)
-            #     time.sleep(1)
-            #
-            # # If can not killed itself terminate
-            # if psutil.pid_exists(pid):
-            #     self._kill_proc(pid, 9)
-            #     time.sleep(1)
-            #
-            # if psutil.pid_exists(pid):
-            #     raise OSError('Process can not stoped.')
-
-            print('Stoped')
-        except Exception as err:
             raise err
 
     def is_running(self):
+        """Checks daemon is running"""
+        return os.path.exists(self._lock)
+
+    def stop(self):
+        """Stop daemon"""
+        if not self.is_running():
+            logger.warning("Already stopped.")
+            return
+
         try:
-            if os.path.exists(self._lock):
-                pid = self._read_pid()
-                running = psutil.pid_exists(pid)
-                if not running:
-                    self._remove_lock()
-            else:
-                running = False
+            self._remove_lock()
+            logger.debug("Daemon stopped.")
         except Exception as err:
             raise err
-        return running
 
-    def _run(self):
+    def get_records(self):
+        """Get timely records"""
+        now = timezone.now()
+        records = Record.objects.all().filter(status=0, start_time__range=[
+            now, now + timezone.timedelta(seconds=self.threshold)])
+        count = records.count()
+        if count > 0:
+            logger.debug("%s New Record(s) found." % count)
+        return records
+
+    def run(self):
+        """Main method that will run on thread.
+        !IMPORTANT: This method should not call directly, call 'start' method instead"""
         self._create_lock()
-        print('Running...')
-        count = 0
+
+        processes = []  # Recorder[]
         while os.path.exists(self._lock):
-            count += 1
-            time.sleep(1)
-        print('Run time over on %s' % count)
-        return
+
+            # Start Process timely records
+            for rcd in self.get_records():
+                try:
+                    t = Recorder(rcd.id)
+                    t.start()
+                    processes.append(t)
+                except Exception as err:
+                    logger.exception("Record could not started with id %s" % rcd.id)
+                    raise err
+
+            # Remove completed processes
+            for p in processes:
+                try:
+                    if not p.is_alive() or not p.is_process_running() or p.completed:
+                        processes.remove(p)
+                except Exception:
+                    logger.exception("Process could not removed from list")
+                    pass
+            time.sleep(self.wait)
+
+        # When stopped check any running processes if exists stop them
+        for p in processes:  # Recorder[]
+            try:
+                if p.is_alive():
+                    p.stop()
+            except:
+                pass

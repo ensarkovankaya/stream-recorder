@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib import admin
+from django.contrib import messages
 from django.utils import timezone
 from django.utils.translation import ugettext as _
 
@@ -40,13 +41,52 @@ class RecordAdminForm(forms.ModelForm):
         return self.cleaned_data['start_time']
 
 
+def terminate_records(modeladmin, request, queryset):
+    if queryset.exclude(status__in=[0, 1, 2]).exists():
+        return messages.error(request, _("Sadece Başlamış veya İşlelen durumlardaki kayıtlar durdurlabilir."))
+    queryset.update(terminate=True, status=4)
+    return messages.success(request, _("Kayıtlar durdurldu."))
+
+terminate_records.short_description = 'Seçili kayıtları durdur'
+
+
+def reschedule_records(modeladmin, request, queryset):
+    if queryset.exclude(status__in=[5,6]).exists():
+        return messages.error(request, _("Sadece İptal edilen veya Hatalı kayıtlar yeniden zamanlanabilir."))
+
+    not_passed = queryset.filter(start_time__gte=timezone.now())
+    not_passed.update(status=0, terminate=False)
+
+    if not_passed.count() != queryset.count():
+        return messages.warning(request, _("Bütün kayıtlar tekrar zamanlamadı."))
+    return messages.success(request, _("Kayıtlar tekrar zamanladı."))
+
+
+reschedule_records.short_description = 'Seçili kayıtları tekrar zamanla'
+
+
 class RecordAdmin(admin.ModelAdmin):
     list_display = ['id', 'name', 'channel', 'start_time', 'time', 'status']
     list_filter = ['status', 'channel']
-    fields = ('channel', 'name', 'status', 'start_time', 'time', 'file', 'log', 'created_at', 'updated_at')
-    readonly_fields = ('created_at', 'updated_at', 'status', 'file', 'user', 'log', 'pid', 'cmd')
+
+    fieldsets = (
+        (_('Kayıt Bilgileri'), {
+            'fields': ('channel', 'name', 'start_time', 'time', 'file', 'status', 'created_at')
+        }),
+        (_('Gelişmiş'), {
+            'classes': ('collapse',),
+            'fields': ('terminate', 'pid', 'record_started', 'record_ended', 'updated_at', 'log')
+        })
+    )
+
+    readonly_fields = (
+        'created_at', 'updated_at', 'status', 'file', 'user', 'log', 'pid',
+        'record_started', 'record_ended', 'terminate'
+    )
 
     form = RecordAdminForm
+
+    actions = [terminate_records, reschedule_records]
 
     def get_changeform_initial_data(self, request):
         return {'time': '01:00:00', 'start_time': timezone.now(), 'channel': Channel.objects.all().first()}

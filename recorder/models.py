@@ -1,10 +1,14 @@
+from logging import getLogger
+
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import models
-from django.utils.translation import ugettext as _
 from django.utils import timezone
+from django.utils.translation import ugettext as _
+from django.core.files.base import ContentFile
 
 User = getattr(settings, 'AUTH_USER_MODEL', get_user_model())
+logger = getLogger('recorder.models')
 
 
 class Category(models.Model):
@@ -32,6 +36,17 @@ class Channel(models.Model):
         return str(self.name)
 
 
+RECORD_STATUSES = [
+    (0, _('Zamanlandı')),
+    (1, _('Başladı')),
+    (2, _('İşleniyor')),
+    (3, _('Başarılı')),
+    (4, _('İptal Edildi')),
+    (5, _('Zaman Aşımı')),
+    (6, _('Hata'))
+]
+
+
 class Record(models.Model):
     channel = models.ForeignKey('Channel', verbose_name=_('Kanal'))
     name = models.CharField(verbose_name=_('Kayıt Adı'), max_length=100)
@@ -41,19 +56,10 @@ class Record(models.Model):
 
     file = models.FileField(verbose_name=_('Dosya'), upload_to='videos/', null=True, blank=True)
 
-    status = models.PositiveSmallIntegerField(verbose_name=_('Durum'), choices=[
-        (0, _('Zamanlandı')),
-        (1, _('Başladı')),
-        (2, _('İşleniyor')),
-        (3, _('Başarılı')),
-        (4, _('İptal Edildi')),
-        (5, _('Zaman Aşımı')),
-        (6, _('Hata'))
-    ], default=0)
+    status = models.PositiveSmallIntegerField(verbose_name=_('Durum'), choices=RECORD_STATUSES, default=0)
 
     log = models.TextField(verbose_name=_('Log'), null=True, blank=True)
     pid = models.PositiveSmallIntegerField(null=True, blank=True)
-    cmd = models.TextField(verbose_name=_('Komut'), null=True, blank=True)
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     deleted = models.BooleanField(default=False)
@@ -68,7 +74,23 @@ class Record(models.Model):
 
     def add_log(self, msg):
         log = "-" * 10 + " " + \
-        timezone.now().strftime('%d/%m/%Y %H:%M:%S') + \
-        " " + "-" * 10 + "\n" + str(msg)
+              timezone.now().strftime('%d/%m/%Y %H:%M:%S') + \
+              " " + "-" * 10 + "\n" + str(msg)
         self.log = self.log + "\n" + log if self.log else log
         self.save()
+
+    def is_passed(self):
+        return self.start_time <= timezone.now()
+
+    def generate_file_name(self, ext):
+        return self.start_time.strftime("%Y-%m-%d_%H-%M-%S") + "_" + str(self.name) + "." + str(ext)
+
+    def create_file(self):
+        if not self.file:
+            self.file.save(self.generate_file_name('mp4'), ContentFile(''), save=False)
+
+    def generate_record_command(self):
+        self.create_file()
+        return "ffmpeg -i '" + str(self.channel.url) + \
+            "' -y -c copy -bsf:a aac_adtstoasc -t " + \
+               str(self.time) + " " + self.file.path
