@@ -6,3 +6,4 @@
 .venv
 script.sh
 media/
+logs

@@ -125,3 +125,68 @@ AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.ModelBackend']
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+# Log
+
+LOG_DIR = os.path.join(BASE_DIR, 'logs')
+
+if not os.path.exists(LOG_DIR):
+    try:
+        os.mkdir(LOG_DIR)
+    except:
+        pass
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s - %(asctime)s - %(module)s - %(process)d - %(thread)d - %(message)s'
+        },
+        'simple': {
+            'format': '%(levelname)s - %(asctime)s - %(message)s'
+        },
+    },
+    'handlers': {
+        'file-debug': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(LOG_DIR, 'debug.log'),
+            'formatter': 'simple'
+        },
+        'file-error': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(LOG_DIR, 'error.log'),
+            'formatter': 'verbose'
+        },
+        'file-request': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(LOG_DIR, 'requests.log'),
+            'formatter': 'simple'
+        },
+        'console': {
+            'class': 'logging.StreamHandler',
+            'level': 'INFO',
+            'formatter': 'simple'
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+            'propagate': True,
+        },
+        'django.request': {
+            'handlers': ['file-request'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        '': {
+            'handlers': ['file-debug'],
+            'level': 'DEBUG',
+        }
+    }
+}
