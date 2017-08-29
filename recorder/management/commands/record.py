@@ -35,6 +35,8 @@ class Command(BaseCommand):
             self.list(**options)
         elif options.get('start'):
             self.start_record(**options)
+        elif options.get('stop'):
+            self.stop_record(**options)
         elif options.get('status'):
             self.record_status(**options)
         else:
