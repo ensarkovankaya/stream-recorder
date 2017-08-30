@@ -21,7 +21,8 @@ class Command(BaseCommand):
         parser.add_argument('-start', type=int, help="Start Record with given id.")
         parser.add_argument('-stop', type=int, help="Stop Record with given id.")
         parser.add_argument('-status', type=int, nargs='+', help="Show Record Status with given id.")
-        parser.add_argument('-daemon', choices=['status', 'start', 'stop'], help="Start, Stop or Check deamon status.")
+        parser.add_argument('-daemon', choices=['status', 'start', 'stop', 'restart'],
+                            help="Start, Stop or Check deamon status.")
         parser.add_argument('--count', type=int, default=20, help="How many items will be shown, default 20.")
         parser.add_argument('--now', action="store_true", help="Don't attention to the record start time.")
         parser.add_argument('--dry-run', action="store_true", help="Do not apply anything to the database.")
@@ -155,18 +156,17 @@ class Command(BaseCommand):
             else:
                 self.stdout.write(self.style.NOTICE("Daemon: Not Running"))
 
-        if action == 'start':
+        elif action == 'start':
             if running:
-                self.stdout.write(self.style.NOTICE("Daemon Already Running"))
+                self.stdout.write(self.style.NOTICE("Daemon: Already Running"))
             else:
-                d.start()
-                time.sleep(.5)
-                if d.is_running():
-                    self.stdout.write(self.style.SUCCESS("Daemon: Started"))
-                else:
-                    self.stdout.write(self.style.ERROR("Daemon Could not Started"))
+                try:
+                    d.start()
+                except Exception as err:
+                    self.stdout.write(self.style.ERROR("Daemon: Could not Started"))
+                    raise err
 
-        if action == 'stop':
+        elif action == 'stop':
             if running:
                 d.stop()
                 time.sleep(1)
@@ -176,3 +176,6 @@ class Command(BaseCommand):
                     self.stdout.write(self.style.ERROR("Daemon Could not Stopped"))
             else:
                 self.stdout.write(self.style.NOTICE("Daemon Already Stopped"))
+
+        elif action == 'restart':
+            d.restart()
