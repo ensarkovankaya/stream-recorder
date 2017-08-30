@@ -11,10 +11,11 @@ logger = getLogger('recorder.record')
 
 
 class Recorder(threading.Thread):
-    def __init__(self, id, wait=2):
+    def __init__(self, id, wait=False, sleep=2):
         threading.Thread.__init__(self, daemon=True)
         logger.debug("Recorder Initialized with id: %s" % id)
         self.id = id
+        self.sleep = sleep
         self.wait = wait
         self.ps = None
         self.terminated = False
@@ -160,7 +161,7 @@ class Recorder(threading.Thread):
             logger.debug("Record: {id}, Pid: {pid}, Check: {check}".format(
                 id=self.id, pid=self.ps.pid, check=check)
             )
-            time.sleep(self.wait)  # Wait
+            time.sleep(self.sleep)  # Wait
 
     def _start_process(self):
         try:
@@ -172,14 +173,22 @@ class Recorder(threading.Thread):
             logger.exception("Process could not started.")
             raise err
 
+    def _wait(self):
+        """Waits until Records start time pass."""
+        while self.rcd.start_time > timezone.now():
+            time.sleep(.5)
+
     def run(self):
         """!IMPORTANT: This method should not call directly, call 'start' method instead"""
 
         try:
             self.mark_as_started()
             self._start_process()  # Start Process
-            self.mark_as_processing()  # Mark Record as processing
 
+            if self.wait:
+                self._wait()
+
+            self.mark_as_processing()  # Mark Record as processing
             self._loop()  # Loop
 
             if self.terminated:
