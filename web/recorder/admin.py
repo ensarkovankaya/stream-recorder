@@ -6,6 +6,13 @@ from django.utils.translation import ugettext as _
 
 from .models import Category, Channel, Record
 
+class RecordInline(admin.TabularInline):
+    model = Record
+    extra = 0
+    fields = ('channel', 'name', 'start_time', 'time')
+
+    def has_add_permission(self, request):
+        return False
 
 class ChannelInline(admin.TabularInline):
     model = Channel
@@ -26,6 +33,7 @@ class ChannelAdmin(admin.ModelAdmin):
     fields = ('name', 'url', 'category')
     readonly_fields = ('created_at', 'updated_at')
 
+    inlines = [RecordInline]
 
 admin.site.register(Channel, ChannelAdmin)
 
@@ -89,7 +97,7 @@ class RecordAdmin(admin.ModelAdmin):
     actions = [terminate_records, reschedule_records]
 
     def get_changeform_initial_data(self, request):
-        return {'time': '01:00:00', 'start_time': timezone.now(), 'channel': Channel.objects.all().first()}
+        return {'time': '00:30:00', 'start_time': timezone.now(), 'channel': Channel.objects.all().first()}
 
     def save_model(self, request, obj, form, change):
         obj.user = request.user

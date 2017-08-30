@@ -23,6 +23,10 @@ class Category(models.Model):
     def channel_count(self):
         return Channel.objects.all().filter(category=self.id).count()
 
+    class Meta:
+        verbose_name = _("Kategori")
+        verbose_name_plural = _("Kategoriler")
+
 
 class Channel(models.Model):
     name = models.CharField(verbose_name=_('Kanal Adı'), unique=True, max_length=100)
@@ -34,6 +38,10 @@ class Channel(models.Model):
 
     def __str__(self):
         return str(self.name)
+
+    class Meta:
+        verbose_name = _("Kanal")
+        verbose_name_plural = _("Kanallar")
 
 
 RECORD_STATUSES = [
@@ -94,3 +102,12 @@ class Record(models.Model):
         return "ffmpeg -i '" + str(self.channel.url) + \
             "' -y -c copy -bsf:a aac_adtstoasc -t " + \
                str(self.time) + " " + self.file.path
+
+    def delete(self, **kwargs):
+        if self.file:
+            self.file.delete()
+        super(Record, self).delete(**kwargs)
+
+    class Meta:
+        verbose_name = _("Kayıt")
+        verbose_name_plural = _("Kayıtlar")
