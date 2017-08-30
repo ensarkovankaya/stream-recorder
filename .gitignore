@@ -9,3 +9,5 @@
 *logs
 .env_local
 web/static
+web/.daemon.lock
+web/.daemon.pid
