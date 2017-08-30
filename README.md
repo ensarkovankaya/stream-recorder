@@ -6,7 +6,26 @@ Requirements:
  - ffmpeg : Use ffmpeg to record streams
 
 
-## Build
+## Docker
+```
+docker-compose build && docker-compose up
+```
+
+### ENV File
+```
+DJANGO_SECRET_KEY=  # Your Secret Key
+DEBUG=false  # Change to True if not production
+ALLOWED_HOSTS=example.com,www.example.com  # define allowed hosts with comma seperated
+USE_SQLITE=false  # Use sqlite database
+
+POSTGRES_DB=  # DB Name
+POSTGRES_USER=  # DB User
+POSTGRES_PASSWORD=  # DB Password
+DB_SERVICE=postgres
+DB_PORT=5432
+```
+
+## Build Manuel
 
 ```
 # Install Requirements

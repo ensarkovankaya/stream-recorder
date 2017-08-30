@@ -4,6 +4,8 @@
 *__pycache__*
 *migrations*
 .venv
-script.sh
-media/
-logs
+*script.sh
+*media/
+*logs
+.env_local
+web/static

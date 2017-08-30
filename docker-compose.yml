@@ -1,0 +1,38 @@
+version: '2'
+
+services:
+  web:
+    build: ./web
+    restart: always
+    links:
+      - postgres:postgres
+    volumes:
+      - ./web:/usr/src/app
+    expose:
+      - "8000"
+    env_file: .env_local
+    command: /usr/local/bin/gunicorn config.wsgi -b 0.0.0.0:8000
+
+  nginx:
+    restart: always
+    build: ./nginx/
+    ports:
+      - "80:80"
+    volumes:
+      - /www/static
+    volumes_from:
+      - web
+    links:
+      - web:web
+
+  postgres:
+    restart: always
+    image: postgres:9.6.2
+    env_file: .env_local
+    ports:
+      - "5431:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data/
+
+volumes:
+  pgdata:
