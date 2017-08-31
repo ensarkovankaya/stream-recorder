@@ -1,20 +1,19 @@
 import os
-import time
-import sys
 import signal
+import sys
+import time
 from logging import getLogger
 
 from django.conf import settings
-from django.utils import timezone
 from django.core.management.base import OutputWrapper
 from django.core.management.color import color_style, no_style
+from django.utils import timezone
 
 from recorder.record import Recorder
 from .models import Record
-
 from .utils.emrah import Daemon as BaseDaemon
 
-logger = getLogger('recorder.daemon')
+logger = getLogger('recorder.Daemon')
 _runfile = os.path.join(settings.BASE_DIR, '.daemon.lock')
 _pidfile = os.path.join(settings.BASE_DIR, '.daemon.pid')
 
@@ -45,6 +44,7 @@ class Daemon(BaseDaemon):
         # Check daemon is running
         pid = self.__getpid()
         if pid:
+            self.stdout.write(self.style.WARNING("Daemon: Already Running"))
             sys.exit(1)
 
         # Start Daemon
@@ -57,7 +57,7 @@ class Daemon(BaseDaemon):
         pid = self.__getpid()
         if not pid:
             self.stdout.write(self.style.WARNING("Daemon already not running"))
-            sys.exit(1)
+            return
 
         # Daemon'i durdurma islemlerine basla.
         self.stdout.write(self.style.WARNING("Trying to stop..."))
@@ -87,15 +87,17 @@ class Daemon(BaseDaemon):
         return os.path.exists(self.runfile)
 
     def get_records(self):
-        logger.debug("Checking new records.")
         """Get timely records"""
-        records = Record.objects.all().filter(status=0, start_time__range=[
-            timezone.now(), timezone.now() + timezone.timedelta(seconds=self.threshold)])
-        count = records.count()
-        if count > 0:
-            logger.debug("%s New Record(s) found." % count)
-        else:
-            logger.debug("0 found.")
+        try:
+            logger.debug("Checking new records.")
+            records = Record.objects.all().filter(status=0, start_time__range=[
+                timezone.now(), timezone.now() + timezone.timedelta(seconds=self.threshold)])
+            count = records.count()
+            if count > 0:
+                logger.debug("%s New Record(s) found." % count)
+        except Exception as err:
+            logger.exception("Error while checking new records.")
+            raise err
         return records
 
     def check_timeouts(self):

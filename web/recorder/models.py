@@ -2,10 +2,10 @@ from logging import getLogger
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.files.base import ContentFile
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import ugettext as _
-from django.core.files.base import ContentFile
 
 User = getattr(settings, 'AUTH_USER_MODEL', get_user_model())
 logger = getLogger('recorder.models')
@@ -85,10 +85,14 @@ class Record(models.Model):
               timezone.now().strftime('%d/%m/%Y %H:%M:%S') + \
               " " + "-" * 10 + "\n" + str(msg)
         self.log = self.log + "\n" + log if self.log else log
-        self.save()
+        self.save(update_fields=['log'])
 
     def is_passed(self):
         return self.start_time <= timezone.now()
+
+    def end_time(self):
+        return self.start_time + timezone.timedelta(hours=self.time.hour, minutes=self.time.minute,
+                                                    seconds=self.time.second)
 
     def generate_file_name(self, ext):
         return self.start_time.strftime("%Y-%m-%d_%H-%M-%S") + "_" + str(self.name) + "." + str(ext)
@@ -100,7 +104,7 @@ class Record(models.Model):
     def generate_record_command(self):
         self.create_file()
         return "ffmpeg -i '" + str(self.channel.url) + \
-            "' -y -c copy -bsf:a aac_adtstoasc -t " + \
+               "' -y -c copy -bsf:a aac_adtstoasc -t " + \
                str(self.time) + " " + self.file.path
 
     def delete(self, **kwargs):

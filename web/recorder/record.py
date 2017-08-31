@@ -2,21 +2,27 @@ import subprocess
 import threading
 import time
 from logging import getLogger
-
 from django.utils import timezone
 
 from recorder.models import Record as RecodModel
 
-logger = getLogger('recorder.record')
+logger = getLogger('recorder.Recorder')
 
 
 class Recorder(threading.Thread):
-    def __init__(self, id, wait=False, sleep=2):
+    def __init__(self, id: int, wait: bool=False, sleep=5, overextend=10):
+        """
+        :param id: int - Record id
+        :param wait: bool - Should wait for the Record start time pass
+        :param sleep: int - How many seconds wait every loop
+        :param overextend: int - Waiting Seconds value if Record ending time over extended.
+        """
         threading.Thread.__init__(self, daemon=True)
         logger.debug("Recorder Initialized with id: %s" % id)
         self.id = id
         self.sleep = sleep
         self.wait = wait
+        self.overextend = overextend
         self.ps = None
         self.terminated = False
         self.completed = False
@@ -141,7 +147,7 @@ class Recorder(threading.Thread):
             logger.error("Loop method called but process not found.")
             raise ValueError("Process not found")
 
-        check = 0
+        start_time = timezone.now()
         # While process is running wait
         while self.is_process_running():
             # check if record canceled
@@ -157,26 +163,42 @@ class Recorder(threading.Thread):
                 self.stop()
                 break
 
-            check += 1
-            logger.debug("Record: {id}, Pid: {pid}, Check: {check}".format(
-                id=self.id, pid=self.ps.pid, check=check)
+            if self.check_is_record_process_end_time_passed():
+                logger.warning("Record %s - Passed end time." % self.id)
+                self.rcd.add_log("Record length over extended")
+                self.stop()
+                break
+
+            passed = timezone.now() - start_time
+
+            logger.debug("Record: {id}, Pid: {pid}, Working for {seconds} seconds".format(
+                id=self.id, pid=self.ps.pid, seconds=int(passed.total_seconds()))
             )
             time.sleep(self.sleep)  # Wait
 
     def _start_process(self):
         try:
             cmd = self.rcd.generate_record_command()
-            logger.debug("Command: %s" % cmd)
+            cmd_log = "Running Command: %s" % cmd
+            logger.info("Record: " + str(self.id) + " - " + cmd_log)
+            self.rcd.add_log(cmd_log)
             self.ps = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            logger.debug("Process started with pid: %s." % self.ps.pid)
+            logger.debug("Record: %s - Started with pid: %s." % (self.id,  self.ps.pid))
+            self.rcd.pid = self.ps.pid
+            self.rcd.save(update_fields=['pid'])
         except Exception as err:
             logger.exception("Process could not started.")
             raise err
 
     def _wait(self):
         """Waits until Records start time pass."""
+        logger.info("Record: %s - Waiting to start..." % self.id)
         while self.rcd.start_time > timezone.now():
             time.sleep(.5)
+
+    def check_is_record_process_end_time_passed(self):
+        """This will check is recording process passed its record time length"""
+        return timezone.now() + timezone.timedelta(seconds=self.overextend) > self.rcd.end_time()
 
     def run(self):
         """!IMPORTANT: This method should not call directly, call 'start' method instead"""
@@ -189,18 +211,20 @@ class Recorder(threading.Thread):
                 self._wait()
 
             self.mark_as_processing()  # Mark Record as processing
+            logger.info("Record %s started." % self.id)
             self._loop()  # Loop
 
             if self.terminated:
                 return
 
             if self.ps.returncode != 0:  #  If not 0 means error
-                logger.error("Record failed exit with %s" % self.ps.returncode)
-                self.mark_as_error()
+                msg = "Record failed exit with %s" % self.ps.returncode
+                logger.error(msg)
+                self.mark_as_error(log=msg)
                 self.save_process_output()
             else:
                 #  Mark as Completed
-                logger.debug("Completed")
+                logger.info("Record %s completed." % self.id)
                 self.mark_as_completed()
         except Exception as err:
             logger.exception("Record failed.")

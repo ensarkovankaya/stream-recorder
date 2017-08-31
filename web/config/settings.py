@@ -148,7 +148,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 LOG_DIR = os.path.join(BASE_DIR, 'logs')
 
-if not os.path.exists(LOG_DIR):
+if not os.path.exists(LOG_DIR):  # Create Log Dir if not exists
     try:
         os.mkdir(LOG_DIR)
     except:
@@ -170,7 +170,7 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
             'filename': os.path.join(LOG_DIR, 'debug.log'),
-            'formatter': 'simple'
+            'formatter': 'verbose'
         },
         'file-error': {
             'level': 'ERROR',
@@ -183,6 +183,24 @@ LOGGING = {
             'class': 'logging.FileHandler',
             'filename': os.path.join(LOG_DIR, 'requests.log'),
             'formatter': 'simple'
+        },
+        'records-INFO': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(LOG_DIR, 'records_info.log'),
+            'formatter': 'verbose'
+        },
+        'records-DEBUG': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(LOG_DIR, 'records_debug.log'),
+            'formatter': 'verbose'
+        },
+        'daemon': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(LOG_DIR, 'daemon.log'),
+            'formatter': 'verbose'
         },
         'console': {
             'class': 'logging.StreamHandler',
@@ -200,6 +218,14 @@ LOGGING = {
             'handlers': ['file-request'],
             'level': 'DEBUG',
             'propagate': True,
+        },
+        'recorder.Recorder': {
+            'handlers': ['records-DEBUG', 'records-INFO'],
+            'level': 'DEBUG',
+        },
+        'recorder.Daemon': {
+            'handlers': ['daemon'],
+            'level': 'DEBUG',
         },
         '': {
             'handlers': ['file-debug'],
