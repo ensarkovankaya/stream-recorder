@@ -28,7 +28,7 @@ services:
   postgres:
     restart: always
     image: postgres:9.6.2
-    env_file: .env_local
+    env_file: .env
     ports:
       - "5431:5432"
     volumes:
