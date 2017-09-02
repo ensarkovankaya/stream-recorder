@@ -2,6 +2,7 @@ import subprocess
 import threading
 import time
 from logging import getLogger
+
 from django.utils import timezone
 
 from recorder.models import Record as RecodModel
@@ -10,7 +11,7 @@ logger = getLogger('recorder.Recorder')
 
 
 class Recorder(threading.Thread):
-    def __init__(self, id: int, wait: bool=False, sleep=5, overextend=10):
+    def __init__(self, id: int, wait: bool = False, sleep=5, overextend=30):
         """
         :param id: int - Record id
         :param wait: bool - Should wait for the Record start time pass
@@ -183,7 +184,7 @@ class Recorder(threading.Thread):
             logger.info("Record: " + str(self.id) + " - " + cmd_log)
             self.rcd.add_log(cmd_log)
             self.ps = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            logger.debug("Record: %s - Started with pid: %s." % (self.id,  self.ps.pid))
+            logger.debug("Record: %s - Started with pid: %s." % (self.id, self.ps.pid))
             self.rcd.pid = self.ps.pid
             self.rcd.save(update_fields=['pid'])
         except Exception as err:
