@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext_lazy as _
 from recorder.models import Category, Channel
 
 import os
@@ -26,7 +26,7 @@ class Command(BaseCommand):
 
         file = os.path.abspath(options['file'])
         if not os.path.exists(file):
-            raise CommandError(_('File not found in %s' % str(file)))
+            raise CommandError(_('File not found in {path}').format(path=str(file)))
 
         with open(file, 'r') as data:
             matches = re.findall(pattern, data.read())

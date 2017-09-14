@@ -1,0 +1,245 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <ensar@kovankaya.com>, 2017.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-09-14 16:31+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: command/admin.py:32
+msgid "Task(s) terminated."
+msgstr "Görev(ler) iptal edildi."
+
+#: command/apps.py:7
+msgid "Command Runner"
+msgstr "Komut Çalıştırıcı"
+
+#: command/models.py:46
+msgid "StdErr"
+msgstr ""
+
+#: command/models.py:47
+msgid "StdOut"
+msgstr ""
+
+#: command/models.py:50 command/models.py:294 recorder/models.py:84
+msgid "Status"
+msgstr "Durum"
+
+#: command/models.py:53 command/models.py:296
+msgid "Task Started"
+msgstr "Görev Başladı"
+
+#: command/models.py:54 command/models.py:297
+msgid "Task Ended"
+msgstr "Görev Sona Erdi"
+
+#: command/models.py:56 command/models.py:300 recorder/models.py:96
+msgid "Created Time"
+msgstr "Oluşturulma Tarihi"
+
+#: command/models.py:57 command/models.py:301 recorder/models.py:97
+msgid "Last Update Time"
+msgstr "Son Güncelleme"
+
+#: command/models.py:62
+msgid "Task"
+msgstr "Görev"
+
+#: command/models.py:63
+msgid "Tasks"
+msgstr "Görevler"
+
+#: command/models.py:304
+msgid "Queue"
+msgstr "Kuyruk"
+
+#: command/models.py:305
+msgid "Queues"
+msgstr "Kuyruklar"
+
+#: ffmpeg/generator.py:19
+msgid "Input File Path"
+msgstr ""
+
+#: ffmpeg/generator.py:20
+msgid "Output File Path"
+msgstr ""
+
+#: ffmpeg/generator.py:23
+msgid "Log Level"
+msgstr ""
+
+#: ffmpeg/generator.py:26
+msgid "Overwrite"
+msgstr ""
+
+#: ffmpeg/generator.py:30
+msgid "Stream Loop"
+msgstr ""
+
+#: ffmpeg/generator.py:33
+msgid "I/O Duration"
+msgstr ""
+
+#: ffmpeg/generator.py:34
+msgid "Add Duration Before Input Flag"
+msgstr ""
+
+#: ffmpeg/generator.py:37
+msgid "Output Position"
+msgstr ""
+
+#: ffmpeg/generator.py:45
+msgid "I/O Position"
+msgstr ""
+
+#: ffmpeg/generator.py:46
+msgid "Add I/O Position Before Input Flag"
+msgstr ""
+
+#: ffmpeg/generator.py:52
+msgid "I/O Position (EOF)"
+msgstr ""
+
+#: ffmpeg/generator.py:58
+msgid "Output File Size Limit (as Bytes)"
+msgstr ""
+
+#: ffmpeg/generator.py:64
+msgid "Input Time Offset"
+msgstr ""
+
+#: ffmpeg/generator.py:68
+msgid "Recording Timestamp"
+msgstr ""
+
+#: ffmpeg/generator.py:69
+msgid "Recording Timestamp: Auto Add Now"
+msgstr ""
+
+#: ffmpeg/generator.py:73
+msgid "Disable Video Recording"
+msgstr "Video Kaydını Devre Dışı Bırak"
+
+#: ffmpeg/generator.py:79
+msgid "Aspect Ratio"
+msgstr "En-Boy Oranı"
+
+#: recorder/admin.py:43
+#, python-brace-format
+msgid "Start Time can not be before {time}"
+msgstr "Başlangıç zamanı {time} dan önce olamaz."
+
+#: recorder/admin.py:53
+msgid "Record Informations"
+msgstr "Kayıt Bilgileri"
+
+#: recorder/admin.py:56 recorder/models.py:90
+msgid "Resize"
+msgstr "Boyutlandır"
+
+#: recorder/apps.py:6
+msgid "IP TV Recorder"
+msgstr "IP TV Kaydedici"
+
+#: recorder/management/commands/import-channels.py:29
+#, python-brace-format
+msgid "File not found in {path}"
+msgstr "Dosya bulunamadı, yol : {path}"
+
+#: recorder/models.py:26
+msgid "Category Name"
+msgstr ""
+
+#: recorder/models.py:39 recorder/models.py:52
+msgid "Category"
+msgstr "Kategori"
+
+#: recorder/models.py:40
+msgid "Categories"
+msgstr "Kategoriler"
+
+#: recorder/models.py:49
+msgid "Channel Name"
+msgstr "Kanal Adı"
+
+#: recorder/models.py:51
+msgid "URL"
+msgstr ""
+
+#: recorder/models.py:61 recorder/models.py:79
+msgid "Channel"
+msgstr "Kanal"
+
+#: recorder/models.py:62
+msgid "Channels"
+msgstr "Kanallar"
+
+#: recorder/models.py:80
+msgid "Record Name"
+msgstr "Kayıt Adı"
+
+#: recorder/models.py:81
+msgid "Start Time"
+msgstr "Başlangıç Zamanı"
+
+#: recorder/models.py:82
+msgid "Time"
+msgstr "Süre"
+
+#: recorder/models.py:87 recorder/models.py:231
+msgid "Video"
+msgstr "Video"
+
+#: recorder/models.py:91
+msgid "Force Original Aspect Ratio"
+msgstr "Oranı Korumaya Zorla"
+
+#: recorder/models.py:113
+msgid "Schedule"
+msgstr "Zamanlama"
+
+#: recorder/models.py:114
+msgid "Schedules"
+msgstr "Zamanlamalar"
+
+#: recorder/models.py:169
+msgid "Video Name"
+msgstr "Video Adı"
+
+#: recorder/models.py:170
+msgid "Video File"
+msgstr "Video Dosyası"
+
+#: recorder/models.py:173
+msgid "File Format"
+msgstr "Dosya Formatı"
+
+#: recorder/models.py:176
+msgid "Attributes"
+msgstr "Özellikleri"
+
+#: recorder/models.py:178
+msgid "Create Time"
+msgstr "Oluşturulma Tarihi"
+
+#: recorder/models.py:179
+msgid "Last Update"
+msgstr "Son Güncelleme"
+
+#: recorder/models.py:232
+msgid "Videos"
+msgstr "Videolar"

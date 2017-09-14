@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
-from recorder.models import Category, Channel
 from prettytable import PrettyTable
+
+from recorder.models import Category, Channel
 
 
 class Command(BaseCommand):
@@ -120,9 +121,9 @@ class Command(BaseCommand):
         channels = Channel.objects.all()
         t = PrettyTable(['id', 'Name', 'Category', 'URL'])
         for ch in channels[:options.get('count', 20)]:
-            t.add_row([ ch.id, ch.name,
-            ch.category if ch.category else "",
-            ch.url ])
+            t.add_row([ch.id, ch.name,
+                       ch.category if ch.category else "",
+                       ch.url])
         print(t)
 
     def list_categories(self, **options):

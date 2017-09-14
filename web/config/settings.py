@@ -13,12 +13,12 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 import os
 
 import environ
+from django.utils.translation import ugettext_lazy as _
 
 env = environ.Env()
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
@@ -31,7 +31,6 @@ DEBUG = env.bool("DEBUG", False)
 
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", [])
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -41,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'command',
     'recorder'
 ]
 
@@ -52,6 +52,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'config.middleware.LocaleMiddleware'
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -75,7 +76,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
@@ -98,7 +98,6 @@ else:
         },
     }
 
-
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
 
@@ -117,7 +116,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
 
@@ -131,7 +129,6 @@ USE_L10N = True
 
 USE_TZ = False
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
@@ -142,7 +139,6 @@ AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.ModelBackend']
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
 
 # Log
 
@@ -228,8 +224,18 @@ LOGGING = {
             'level': 'DEBUG',
         },
         '': {
-            'handlers': ['file-debug'],
+            'handlers': ['file-debug', 'file-error'],
             'level': 'DEBUG',
         }
     }
 }
+
+# Translations
+LOCALE_PATHS = (
+    os.path.join(BASE_DIR, 'locale'),
+)
+
+LANGUAGES = (
+    ('en-EN', 'English'),
+    ('tr-TR', 'Türkçe'),
+)
