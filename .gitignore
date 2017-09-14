@@ -11,5 +11,3 @@
 web/static
 web/.daemon.lock
 web/.daemon.pid
-web/first.sh
-web/.env
