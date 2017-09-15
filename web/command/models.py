@@ -13,7 +13,7 @@ from django.utils.translation import ugettext_lazy as _
 from command.errors import CommandError, DependenceError, ProcessError, StatusError, TaskError
 from command.utils import pid_exists
 
-from ffmpeg.utils.base import ChoiceEnum
+from ffmpeg.utils import ChoiceEnum
 
 logger = getLogger("task.models")
 

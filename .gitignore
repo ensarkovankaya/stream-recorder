@@ -2,11 +2,10 @@
 .idea
 *pyc
 *__pycache__*
-*migrations/0*
+*/*/*migrations/0*
 .venv
-*script.sh
 *media/
-*logs
+web/logs/*.log
 .env_local
 web/static
 web/.daemon.lock

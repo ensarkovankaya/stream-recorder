@@ -1,4 +1,3 @@
-from datetime import datetime
 from logging import getLogger
 
 from django.db.models.signals import post_save
@@ -7,10 +6,12 @@ from django.utils import timezone
 
 from command.models import Queue, Task, QueueStatus
 
-from ffmpeg.generator import Codec, Command, LogLevel
-from ffmpeg.utils.filters import BitstreamChannelFilter, FFmpegFilter, FOAR, ScaleFilter, StreamSpecifier
+from ffmpeg.generator import Command
+from ffmpeg.codecs import Codec
+from ffmpeg.utils import LogLevel
+from ffmpeg.filters import BitstreamChannelFilter, FFmpegFilter, FOAR, ScaleFilter, StreamSpecifier
 
-from recorder.models import Schedule, Video, ScheduleStatus
+from recorder.models import Schedule, Video
 from recorder.utils import generate_random_string
 
 logger = getLogger('recorder.signals.handlers')
@@ -134,4 +135,3 @@ def on_queue_status_change(instance: Queue, created, **kwargs):
                 except Exception:
                     logger.exception("Schedule<%d> status can not change Completed" % s.id)
                     raise
-

@@ -13,10 +13,10 @@ from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
 from command.models import Queue
-from ffmpeg.utils.base import ChoiceEnum
-from ffmpeg.utils.ffprobe import get_file_attributes
-from ffmpeg.utils.filters import FOAR
-from ffmpeg.utils.video import VIDEO_SIZES
+from ffmpeg.utils import ChoiceEnum
+from ffmpeg.ffprobe import get_file_attributes
+from ffmpeg.filters import FOAR
+from ffmpeg.utils import VIDEO_SIZES
 
 User = getattr(settings, 'AUTH_USER_MODEL', get_user_model())
 logger = getLogger('recorder.models')
