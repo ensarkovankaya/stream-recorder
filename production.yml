@@ -10,7 +10,7 @@ services:
       - ./web:/usr/src/app
     expose:
       - "8000"
-    env_file: .env_local
+    env_file: .env
     command: /usr/local/bin/gunicorn config.wsgi -b 0.0.0.0:8000
 
   nginx:
@@ -28,7 +28,7 @@ services:
   postgres:
     restart: always
     image: postgres:9.6.2
-    env_file: .env_local
+    env_file: .env
     ports:
       - "5431:5432"
     volumes:
