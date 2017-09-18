@@ -7,7 +7,7 @@ Requirements:
 
 ## Build
 
-#### Enviroments
+### Enviroments
 
 For development create .env_local file.
 
@@ -46,9 +46,10 @@ docker-compose up  # This will use docker-compose.yml
 docker-compose up -f production.yml
 ```
 
-## Build (Manuel)
+### Manuel Build
 
 ```
+# You should set environments first
 # Install Requirements
 pip install -r requirements.txt
 

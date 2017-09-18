@@ -70,11 +70,11 @@ function run {
 }
 
 function daemon {
-    echo 'ENTRYPOINT: Restarting Daemon.'
-    python manage.py daemon -restart
+    echo 'ENTRYPOINT: Daemon: ' $1
+    python manage.py daemon -$1
 }
 
-while getopts "cahsmirdf" opt "$@"; do
+while getopts "cahsmir:df" opt "$@"; do
     case "${opt}" in
         c) clear;;
         a) add_admin;;
@@ -84,7 +84,7 @@ while getopts "cahsmirdf" opt "$@"; do
         i) migrate;;
         r) run;;
         d) daemon;;
-        f) clear && makemigrations && migrate && collectstatic && add_admin && add_channel && daemon && run;;
+        f) clear && makemigrations && migrate && collectstatic && add_admin && add_channel && daemon restart && run;;
         \?) exit 1;;
         :) echo "ENTRYPOINT: Option -$OPTARG requires an argument." >&2 && exit 1;;
     esac
