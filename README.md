@@ -36,6 +36,7 @@ CATEGORY=
 
 ### Docker
 ```
+touch .env_local
 docker-compose build
 
 # For Development

@@ -51,7 +51,7 @@ function add_admin {
         echo 'ENTRYPOINT: Add Admin.'
         python manage.py shell -c "from django.contrib.auth import get_user_model; get_user_model().objects.create_superuser('${ADMIN_USERNAME}', '${ADMIN_EMAIL}', '${ADMIN_PASSWORD}') if not get_user_model().objects.all().filter(username='${ADMIN_USERNAME}').exists() else print('${ADMIN_USERNAME} exists.')"
     else
-        echo 'ENTRYPOINT: ADMIN_* variables not set.' && exit 1
+        echo 'ENTRYPOINT: ADMIN_* variables not set.'
     fi
 }
 
@@ -60,7 +60,7 @@ function add_channel {
         echo 'ENTRYPOINT: Add Channel'
         python manage.py stream -add channel --channel-name "${CHANNEL_NAME}" --channel-url "${CHANNEL_URL}" --category-name "${CATEGORY}" --create-category
     else
-        echo 'ENTRYPOINT: CHANNEL_* variables not set.' && exit 1
+        echo 'ENTRYPOINT: CHANNEL_* variables not set.'
     fi
 }
 
@@ -70,11 +70,21 @@ function run {
 }
 
 function daemon {
-    echo 'ENTRYPOINT: Daemon: ' $1
-    python manage.py daemon -$1
+    if [ "$1" == 'start' ]; then
+        echo 'ENTRYPOINT: Starting Daemon...'
+        python manage.py daemon -start
+    elif [ "$1" == 'restart' ]; then
+        echo 'ENTRYPOINT: Restarting Daemon...'
+        python manage.py daemon -restart
+    elif [ "$1" == 'stop' ]; then
+        echo 'ENTRYPOINT: Stopping Daemon...'
+        python manage.py daemon -stop
+    else
+        echo 'ENTRYPOINT: Unknown Command:' $1
+    fi
 }
 
-while getopts "cahsmir:df" opt "$@"; do
+while getopts "cahsmir:dfp" opt "$@"; do
     case "${opt}" in
         c) clear;;
         a) add_admin;;
@@ -83,8 +93,7 @@ while getopts "cahsmir:df" opt "$@"; do
         m) makemigrations;;
         i) migrate;;
         r) run;;
-        d) daemon;;
-        f) clear && makemigrations && migrate && collectstatic && add_admin && add_channel && daemon restart && run;;
+        d) daemon $2;;
         \?) exit 1;;
         :) echo "ENTRYPOINT: Option -$OPTARG requires an argument." >&2 && exit 1;;
     esac
