@@ -3,7 +3,7 @@ from django.utils.translation import ugettext_lazy as _
 
 class RecorderConfig(AppConfig):
     name = 'recorder'
-    verbose_name = _('IP TV Recorder')
+    verbose_name = _('Stream Recorder')
 
     def ready(self):
         import recorder.signals.handlers  #noqa

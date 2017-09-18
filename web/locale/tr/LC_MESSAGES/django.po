@@ -152,8 +152,8 @@ msgid "Resize"
 msgstr "Boyutlandır"
 
 #: recorder/apps.py:6
-msgid "IP TV Recorder"
-msgstr "IP TV Kaydedici"
+msgid "Stream Recorder"
+msgstr "Akış Kaydedici"
 
 #: recorder/management/commands/import-channels.py:29
 #, python-brace-format

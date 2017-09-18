@@ -1,6 +1,6 @@
-# IPTV Recorder
+# Stream Recorder
 
-IPTV Recorder Django web app that record IPTV Broadcasts.
+Django web app that records Streams.
 
 Requirements:
  - ffmpeg : Use ffmpeg to record streams
