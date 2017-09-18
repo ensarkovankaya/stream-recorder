@@ -5,13 +5,12 @@ Django web app that records Streams.
 Requirements:
  - ffmpeg : Use ffmpeg to record streams
 
+## Build
 
-## Docker
-```
-docker-compose build && docker-compose up
-```
+#### Enviroments
 
-### ENV File
+For development create .env_local file.
+
 ```
 DJANGO_SECRET_KEY=  # Your Secret Key
 DEBUG=false  # Change to True if not production
@@ -23,31 +22,54 @@ POSTGRES_USER=  # DB User
 POSTGRES_PASSWORD=  # DB Password
 DB_SERVICE=postgres
 DB_PORT=5432
+
+# (Optional) You can define admin username, email and password. Script will create if not exists.
+ADMIN_USERNAME=
+ADMIN_EMAIL=
+ADMIN_PASSWORD=
+
+# (Optional) You can add a channel. Script will create if not exists.
+CHANNEL_NAME=
+CHANNEL_URL=
+CATEGORY=
 ```
 
-## Build Manuel
+### Docker
+```
+docker-compose build
+
+# For Development
+# Development uses .env_local file.
+docker-compose up  # This will use docker-compose.yml
+
+# For Production
+docker-compose up -f production.yml
+```
+
+## Build (Manuel)
 
 ```
 # Install Requirements
 pip install -r requirements.txt
 
 # Make Migrations
-python manage.py makemigrations recorder
+python manage.py makemigrations
 python manage.py migrate
 
-# Create User
+# Create an Admin User
 python manage.py createsuperuser
+
+# Start Daemon
+python manage.py daemon -start
 
 # Run Server
 python manage.py runserver
 
-# Start Daemon which checks new Records every 5 seconds
-python manage.py recorder -daemon start
 ```
 
 ## Channels
 
-You can simply add channels from admin panel or command line. Channels can have categories.
+Channels are stream sources that will record.
 
 ```
 # Adding Channel from command line
@@ -62,26 +84,70 @@ python manage.py channel -list channel
 python manage.py channel -list category
 ```
 
-## Records
-
-Records are timely events which you specify a channel, a name and feature time. You can add records from admin panel.
-For records to start at time Daemon must be running.
-
-```
-# Starting Daemon
-python manage.py record -daemon start # You can use 'status', 'start', 'stop' or 'restart'
-
-# Listing Records
-# You filter by: all, scheluded, started, processing, succesful, canceled, timeout, error
-python manage.py record -list all
-
-# With multiple filter
-python manage.py record -list scheluded started
-
-# List will show limited amount of data (default 20) you can change it with --count flag
-python manage.py record -list all --count 50
-```
-
 ## Categories
 
-Categories have no effect right now but its nice to have. You can see how many channels in one category and one place.
+Categories have no effect right now but its nice to have. You can see how many channels in a category from admin.
+
+## Task
+
+Tasks are commands will run in shell.
+
+### Creating Simple Task
+
+```
+t = Task(command="echo 'Hello World'")  # Create a Task
+t.run()
+
+t.get_status_display()  # Check status
+Completed
+
+print(t.stdout)  # You can see output
+Hello World
+
+t.started_at  # When process started
+t.ended_at  # When process ended
+```
+
+### Depending Tasks
+
+Tasks can depends each other. Depending tasks will not run until dependence complete.
+
+```
+t1 = Task(command="echo 'Task 1'")
+t2 = Task(command="echo 'Task 2'", depends=t1)
+
+t2.run() # Will raise DependenceError
+ERROR: Task dependence on Task<1> and task not completed.
+```
+
+## Queue
+
+Queues are list of tasks that will run in order.
+
+### Simple Queue
+
+```
+q = Queue.objects.create()
+
+t1 = Task.objects.create(command="echo 'Task One'")
+t2 = Task.objects.create(command="echo 'Task Two'")
+
+q.add(t1, t2)
+q.start()  # This will run first t1 than t2
+```
+
+### Dependence Task in Queue
+
+If task depends another task when adding to the queue dependence will add first in queue.
+
+```
+t1 = Task.objects.create(command="echo 'Task One'")
+t2 = Task.objects.create(command="echo 'Task Two'")
+t3 = Task.objects.create(command="echo 'Task Three'", depends=t2)
+
+q = Queue.objects.create()
+q.add(t1, t3)
+
+q.tasks()  # Returns in run order
+[Task<1>, Task<2>, Task<3>]
+```

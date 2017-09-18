@@ -4,7 +4,8 @@ from command.errors import DependenceError, CommandError
 
 
 class TaskTestCase(TestCase):
-    def create_task(self, **kwargs):
+    @staticmethod
+    def create_task(**kwargs):
         return Task.objects.create(**kwargs)
 
     def test_create_task(self):
@@ -51,10 +52,12 @@ class TaskTestCase(TestCase):
 
 
 class QueueTestCase(TestCase):
-    def create_task(self, **kwargs):
+    @staticmethod
+    def create_task(**kwargs):
         return Task.objects.create(**kwargs)
 
-    def create_queue(self, **kwargs):
+    @staticmethod
+    def create_queue(**kwargs):
         return Queue.objects.create(**kwargs)
 
     def test_create_queue(self):

@@ -1,5 +1,5 @@
 """
-WSGI config for iptv project.
+WSGI config for stream project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 

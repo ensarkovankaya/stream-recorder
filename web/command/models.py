@@ -424,20 +424,21 @@ class Queue(models.Model):
     def next_line(self):
         return self.tasks().count() + 1
 
-    def add(self, task: Task):
-        if self.status != QueueStatus.Created:
-            raise StatusError("Queue<%d>: Status not valid to add Task<%d>." % (self.id, task.id))
+    def add(self, *tasks: Task):
+        for task in tasks:
+            if self.status != QueueStatus.Created:
+                raise StatusError("Queue<%d>: Status not valid to add Task<%d>." % (self.id, task.id))
 
-        if task.depends:
-            self.add(Task.objects.get(id=task.depends.id))
+            if task.depends:
+                self.add(Task.objects.get(id=task.depends.id))
 
-        if self.tasks().filter(id=task.id).exists():
-            logger.warning("Queue<%d>: Task<%d> already in queue." % (self.id, task.id))
-        else:
-            try:
-                task.line = self.next_line()
-                task.queue = self
-                task.save()
-            except Exception:
-                logger.exception("Queue<%d>: Task<%d> can not added." % (self.id, task.id))
-                raise
+            if self.tasks().filter(id=task.id).exists():
+                logger.warning("Queue<%d>: Task<%d> already in queue." % (self.id, task.id))
+            else:
+                try:
+                    task.line = self.next_line()
+                    task.queue = self
+                    task.save()
+                except Exception:
+                    logger.exception("Queue<%d>: Task<%d> can not added." % (self.id, task.id))
+                    raise
