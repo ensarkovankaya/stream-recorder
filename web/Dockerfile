@@ -17,8 +17,7 @@ RUN apt-get update && apt-get -y install autoconf automake build-essential libas
   libxcb-xfixes0-dev pkg-config texinfo wget zlib1g-dev
 
 # Create Build Directories
-RUN mkdir -p $FFMPEG_SOURCES && \
-    mkdir -p $FFMPEG_BUILD
+RUN mkdir -p $FFMPEG_SOURCES $FFMPEG_BUILD
 
 # Compile Yasm
 RUN cd $FFMPEG_SOURCES && \
@@ -56,7 +55,7 @@ RUN apt-get install -y cmake mercurial && \
 
 # Compile libfdk-aac
 RUN cd $FFMPEG_SOURCES && \
-    wget -O https://github.com/mstorsjo/fdk-aac/tarball/master && \
+    wget -O fdk-aac.tar.gz https://github.com/mstorsjo/fdk-aac/tarball/master && \
     tar xzvf fdk-aac.tar.gz && \
     cd mstorsjo-fdk-aac* && \
     autoreconf -fiv && \
