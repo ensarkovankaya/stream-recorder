@@ -86,18 +86,13 @@ function daemon {
 
 if [ "$1" == "bash" ]; then
     exec bash
-else
-    while getopts "cahsmi:d" opt "$@"; do
-        case "${opt}" in
-            c) clear;;
-            a) add_admin;;
-            h) add_channel;;
-            s) collectstatic;;
-            m) makemigrations;;
-            i) migrate;;
-            d) daemon $2;;
-        esac
-    done
-    run  # Run Server
-    daemon stop  # On exit stop daemon
+elif [ "$1" == "-run" ]; then
+    run
+elif [ "$1" == "-prod" ]; then
+    makemigrations
+    migrate
+    collectstatic
+    daemon restart
+    run
+    daemon stop
 fi
