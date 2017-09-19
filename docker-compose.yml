@@ -10,7 +10,7 @@ services:
     expose:
       - "8000"
     env_file: .env_local
-    entrypoint: ./entrypoint.sh -c -m -i -s -a -h -d restart
+    entrypoint: ./entrypoint.sh
 
   nginx:
     restart: always
