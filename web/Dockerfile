@@ -12,7 +12,7 @@ ENV FFMPEG_BUILD /tmp/ffmpeg_build
 ENV FFMPEG_BIN /usr/bin
 
 # Install Dependencies
-RUN ./build_ffmpeg.sh
+RUN /usr/src/app/build_ffmpeg.sh
 
 # Cleaning
 RUN apt-get clean && \
