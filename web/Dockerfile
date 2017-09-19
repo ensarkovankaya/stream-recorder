@@ -29,6 +29,15 @@ RUN cd $FFMPEG_SOURCES && \
     make && \
     make install
 
+# Compile Nasm
+RUN cd $FFMPEG_SOURCES && \
+    wget http://www.nasm.us/pub/nasm/releasebuilds/2.13.01/nasm-2.13.01.tar.bz2 && \
+    tar xjvf nasm-2.13.01.tar.bz2 && \
+    cd nasm-2.13.01 && \
+    ./autogen.sh && \
+    PATH="$FFMPEG_BIN:$PATH" ./configure --prefix="$FFMPEG_BUILD" --bindir="$FFMPEG_BIN" && \
+    PATH="$FFMPEG_BIN:$PATH" make && make install
+
 # Compile libx264
 RUN cd $FFMPEG_SOURCES && \
     wget http://download.videolan.org/pub/x264/snapshots/last_x264.tar.bz2 && \
