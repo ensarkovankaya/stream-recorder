@@ -84,17 +84,20 @@ function daemon {
     fi
 }
 
-while getopts "cahsmir:dfp" opt "$@"; do
-    case "${opt}" in
-        c) clear;;
-        a) add_admin;;
-        h) add_channel;;
-        s) collectstatic;;
-        m) makemigrations;;
-        i) migrate;;
-        r) run;;
-        d) daemon $2;;
-        \?) exit 1;;
-        :) echo "ENTRYPOINT: Option -$OPTARG requires an argument." >&2 && exit 1;;
-    esac
-done
+if [ "$1" == "bash" ]; then
+    exec bash
+else
+    while getopts "cahsmi:d" opt "$@"; do
+        case "${opt}" in
+            c) clear;;
+            a) add_admin;;
+            h) add_channel;;
+            s) collectstatic;;
+            m) makemigrations;;
+            i) migrate;;
+            d) daemon $2;;
+        esac
+    done
+    run  # Run Server
+    daemon stop  # On exit stop daemon
+fi

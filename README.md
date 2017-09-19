@@ -7,7 +7,7 @@ Requirements:
 
 ## Build
 
-### Enviroments
+### Settings Enviroments
 
 For development create .env_local file.
 
